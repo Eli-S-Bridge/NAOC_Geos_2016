@@ -114,6 +114,6 @@ Calibration.periods
 Calibration<-make.calibration(Proc.data, Calibration.periods)
 
 #save it for later use
-save(Calibration, file = "FLightR_calibration")
+save(Calibration, file = "data/FLightR_calibration")
 
 
