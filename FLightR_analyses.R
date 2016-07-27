@@ -17,7 +17,7 @@
 library(SGAT)
 library(BAStag)
 library(GeoLight)
-library(FlightR)
+library(FLightR)
 
 #read in pre-processed data and calibration data
 Proc.data<-get.tags.data("data/A2_FLightR_twl.csv") #opens and formats data straight from TAGS formatted csv file
