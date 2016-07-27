@@ -55,7 +55,8 @@ Grid<-make.grid(left=-14, bottom=30, right=13, top=57,
 all.in<-make.prerun.object(Proc.data, Grid, start=c(5.43, 52.93), Calibration=Calibration)
 
 #Save this if you want
-#save(all.in, file = "FLightR_alldata.Rdata", compress = T)
+#save(all.in, file = "data/FLightR_alldata.Rdata", compress = T)
+#load(file = "data/FLightR_alldata.Rdata")
 
 # RUN THE PARTICLE FILTER
 
@@ -65,7 +66,7 @@ all.in<-make.prerun.object(Proc.data, Grid, start=c(5.43, 52.93), Calibration=Ca
 #   -known.last = TRUE if you know the track ends where it began  (FALSE is the default) 
 #   -check.outliers = TRUE, for the "on a fly" discard of outliers (only recommended to make pretty maps).
 
-nParticles=1e1      #just a quick trial
+nParticles=1e4     #just a quick trial
 a= Sys.time()       #This lets you measure the analysis time
 
 Result<-run.particle.filter(all.in, threads=-1,
@@ -74,18 +75,15 @@ Result<-run.particle.filter(all.in, threads=-1,
 b= Sys.time()
 b-a                 #how long did it take?
 
-
-save(Result, file="Result.bltg.ageing.model.noOD.RData")
-
-#Now your results are as an RData object.
+#Now save your results are as an RData object.
+#save(Result, file="data/Result.bltg.ageing.model.noOD.RData")
+#load("data/Result.bltg.ageing.model.noOD.RData")
 
 #PLOTTING
 #Plot a simple map
-
-map.FLightR.ggmap(Result)
+map.FLightR.ggmap(Result, save.options = list(filename = "data/FLightR.map.pdf"))
 
 #Plot lon lat graph
-
 plot.lon.lat(Result)
 
 
