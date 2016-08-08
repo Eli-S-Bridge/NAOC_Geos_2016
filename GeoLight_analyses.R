@@ -10,6 +10,8 @@
 #The National Science Foundation
 
 #--------------------------------------------------------------
+#/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+#--------------------------------------------------------------
 
 #Geolight analyses.
 
@@ -31,12 +33,12 @@ track <- coord(twl = twl, degElevation = cal1, tol = 0,
                method = "NOAA", note = TRUE)
 
 #plot a map
-tripMap(track, equinox = TRUE, xlim = c(-90,-70), ylim = c(10,50), legend = TRUE)
+tripMap(track, equinox = TRUE, xlim = c(-90,-70), ylim = c(10,60), legend = TRUE)
 
 #You can remove some obvious outliers with the distance filter. 
 #SIMEON, I DON'T THINK THE UNITS OPTION FOR "DAY" IS WORKING.
-d.filt <- distanceFilter(twl=twl, degElevation = cal1, distance = 20, units = "hour")
-tripMap(track[d.filt,], equinox = TRUE, xlim = c(-90,-70), ylim = c(10,50), legend = TRUE)
+d.filt <- distanceFilter(twl=twl, degElevation = cal1, distance = 35, units = "hour")
+tripMap(track[d.filt,], equinox = TRUE, xlim = c(-90,-70), ylim = c(10,60), legend = TRUE)
 
 #You can also remove outliers by applying a loess smoother to filter outlying twilights.
 l.filt = loessFilter(twl, k = 3, plot = TRUE)
@@ -68,14 +70,12 @@ tripMap(track[all.filt,], equinox = TRUE, xlim = c(-90,-70), ylim = c(10,50), le
 
 #To discern movement and stationary periods you can employ a changepoint analysis.
 #Let's apply it to the filtered data
-#SIMEON, THIS ONLY WORKS WITH THE LOESS FILTERED DATA.
-#WHY CAN'T I USE twl[all.filt,] ?
-cl <- changeLight(twl[l.filt,], quantile = 0.95, rise.prob = NA, set.prob = NA, days = 5, plot = TRUE, summary = TRUE)
-siteMap(track[l.filt,], cl$site, type = "cross", hull = T, xlim = c(-90,-70), ylim = c(10,50), legend = TRUE)
+cl <- changeLight(twl[all.filt,], quantile = 0.95, rise.prob = NA, set.prob = NA, days = 5, plot = TRUE, summary = TRUE)
+siteMap(track[all.filt,], cl$site, type = "cross", hull = T, xlim = c(-90,-70), ylim = c(10,50), legend = TRUE)
 
 #The mergeSites() function lets you group data according to your changeLight results
 #SIMEON THESE RESULTS SEEM OFF.
-ms <- mergeSites(twl[l.filt,], site = cl$site, degElevation = cal1, distThreshold = 350)
-siteMap(track[l.filt,], ms$site, type = "cross", hull = F, xlim = c(-90,-70), ylim = c(10,50), legend = TRUE)
+ms <- mergeSites(twl[all.filt,], site = cl$site, degElevation = cal1, distThreshold = 350)
+siteMap(track[all.filt,], ms$site, type = "cross", hull = F, xlim = c(-90,-70), ylim = c(10,60), legend = TRUE)
 lines(x=ms$summary$Lon, y=ms$summary$Lat)
 

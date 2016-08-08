@@ -10,6 +10,8 @@
 ## The National Science Foundation
 
 #--------------------------------------------------------------
+#/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+#--------------------------------------------------------------
 
 #FLightR analyses.
 #Note that we have already performed some of the preparatory steps
@@ -76,14 +78,16 @@ b= Sys.time()
 b-a                 #how long did it take?
 
 #Now save your results are as an RData object.
-#save(Result, file="data/Result.bltg.ageing.model.noOD.RData")
-#load("data/Result.bltg.ageing.model.noOD.RData")
+#save(Result, file="data/A2_FLightR_results.RData")
+load("data/A2_FLightR_results.RData")
 
 #PLOTTING
 #Plot a simple map
+map.FLightR.ggmap(Result)
+
+#PLOTTING
+#Plot and save a simple map
 map.FLightR.ggmap(Result, save.options = list(filename = "data/FLightR.map.pdf"))
 
 #Plot lon lat graph
 plot.lon.lat(Result)
-
-
