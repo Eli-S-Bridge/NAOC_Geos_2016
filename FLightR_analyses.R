@@ -1,13 +1,13 @@
-#Geolocation analysis with Open Source Tools
-#2016 North American Ornithological Congress, Washington D.C.
+# Geolocation analysis with Open Source Tools
+# 2016 North American Ornithological Congress, Washington D.C.
 
-#Sponsored by: 
+## Sponsored by: 
 
-#Migrate Technology LLC.-- www.migratetech.co.uk
+## Migrate Technology LLC.-- www.migratetech.co.uk
 
-#The Cooper Ornithological Society
+## The Cooper Ornithological Society
 
-#The National Science Foundation
+## The National Science Foundation
 
 #--------------------------------------------------------------
 
