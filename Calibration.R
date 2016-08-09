@@ -91,7 +91,6 @@ start=c(5.43, 52.93)  #tracking orgin, start location longitude and latitude
 plot.slopes.by.location(Proc.data=Proc.data, location=start)
 
 #Use abline to visualize potential calibration periods
-#!!!!!!!!!!!!!!!!THE LINES DON'T SHOW UP!!!!!!!!!!!!!!!!!!!!!!
 abline(v=as.POSIXct("2013-08-22")) # end of first calibration period
 abline(v=as.POSIXct("2014-04-05")) # start of the second calibration period
 
