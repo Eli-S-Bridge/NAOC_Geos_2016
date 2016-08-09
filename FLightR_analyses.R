@@ -19,6 +19,10 @@
 library(SGAT)
 library(BAStag)
 library(GeoLight)
+
+# install latest FLightR
+library(devtools)
+install_github('eldarrak/FlightR')
 library(FLightR)
 
 #read in pre-processed data and calibration data
