@@ -18,6 +18,7 @@ This package contains scripts and files for use in the 2016 Geolocation analysis
 These materials are free to modify and distribute, we ask only that you acknowledge the workshop and its sponsors in any publications and retain the headings in any shared materials. 
 
 The suggested progression through the scripts  is:
+
 1. Preprocessing_BAS.R
 1. Preprocessing_LUX.R
 1. Calibration.R
