@@ -88,10 +88,7 @@ alpha <- c(fitml$estimate[1], fitml$estimate[2]) ## Twilight model parameters
 #Need some help here. The zenith angle needs to be about 97 to get reasonable results
 zenith0 <- median(z) #used only for simple threshold map
 zenith0
-zenith  <- quantile(z, prob = .05)  #use the 95% of the zenith angles. Why??? This is too low a value
-zenith <- zenith0  #still too low a value
-zenith <- 97  #Maybe a bit too high. 
-zenith <- median(z)
+zenith  <- quantile(z, prob = .95)  #use the 95% of the zenith angles. Why??? This is too low a value
 
 path <- thresholdPath(twl$Twilight, twl$Rise, zenith = zenith, tol = 0.15)
 #have a quick look to see that it makes sense.
@@ -138,7 +135,6 @@ model <- thresholdModel(twl$Twilight, twl$Rise,
                         twilight.model="ModifiedLogNormal",
                         alpha=alpha, beta=beta,
                         x0=x0,z0=z0,zenith=zenith,fixedx=fixedx)
-
 
 proposal.x <- mvnorm(S=diag(c(0.005,0.005)),n=nlocation(x0))  #specify a multivariate normal distribution for the sampler
 proposal.z <- mvnorm(S=diag(c(0.005,0.005)),n=nlocation(z0))
