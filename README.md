@@ -7,7 +7,6 @@ Sponsored by:
 
 [<img src="http://americanornithology.org/sites/default/files/logos/aou-cooper-logos-150.png" width=150>](http://americanornithology.org/content/cooper-ornithological-society) [<img src="http://www.nsf.gov/images/logos/nsf1.jpg" width=150>](http://www.nsf.gov)
 
---------------------------------------------------------------
 This package contains scripts and files for use in the 2016 Geolocation analysis workshop.
 
 These materials are free to modify and distribute, we ask only that you acknowledge the workshop and its sponsors in any publications and retain the headings in any shared materials. 
