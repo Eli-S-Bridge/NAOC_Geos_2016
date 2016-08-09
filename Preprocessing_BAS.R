@@ -15,7 +15,7 @@
 
 #First reduce the data down to just datestamps and light levels
 #use the readLig function in BAStag to read in the data
-setwd("~/Documents/GitHub/NAOC_Geos_2016")
+
 library("TwGeos")                                 #load the BAStag package
 d.lig <- readLig("data/749_000.lig", skip = 0)    #read the data into a dataframe called d.lig
 d.lig <- subset(d.lig,select=c("Date","Light"))   #reduce the dataframe to just Date and Light
