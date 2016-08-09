@@ -14,12 +14,12 @@ These materials are free to modify and distribute, we ask only that you acknowle
 
 The suggested progression through the scripts  is:
 
-1. Preprocessing_BAS.R
-1. Preprocessing_LUX.R
-1. Calibration.R
-1. GeoLight_analyses.R
-1. SGAT_analyses.R
-1. FLightR_analyses.R
+1. [Preprocessing_BAS.R](Preprocessing_BAS.R)
+1. [Preprocessing_LUX.R](Preprocessing_LUX.R)
+1. [Calibration.R](Calibration.R)
+1. [GeoLight_analyses.R](GeoLight_analyses.R)
+1. [SGAT_analyses.R](SGAT_analyses.R)
+1. [FLightR_analyses.R](FLightR_analyses.R)
 
 Don't forget to establish the correct working directory after you open the first script:
 
