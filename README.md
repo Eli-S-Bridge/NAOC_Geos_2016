@@ -5,7 +5,7 @@ Sponsored by:
 
 [<img src="MT_logo.gif" width="300">](http://www.migratetech.co.uk)
 
-[<img src="http://americanornithology.org/sites/default/files/logos/aou-cooper-logos-150.png" width=150>](http://americanornithology.org/content/cooper-ornithological-society) [<img src="http://www.nsf.gov/images/logos/nsf1.jpg" width=150>](www.nsf.gov)
+[<img src="http://americanornithology.org/sites/default/files/logos/aou-cooper-logos-150.png" width=150>](http://americanornithology.org/content/cooper-ornithological-society) [<img src="http://www.nsf.gov/images/logos/nsf1.jpg" width=150>](http://www.nsf.gov)
 
 --------------------------------------------------------------
 This package contains scripts and files for use in the 2016 Geolocation analysis workshop.
