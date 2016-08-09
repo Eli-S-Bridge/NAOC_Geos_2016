@@ -28,5 +28,5 @@ in RStudio: (Session -> Set Working Directory -> To Project Directory)
 
 ----------------------------------------------------------------
 Authors:
-Eli Bridge, Simeon Lisovski & Eldar Rakhimberdiev
+Eli Bridge, Simeon Lisovski, Eldar Rakhimberdiev, and Michael Hallworth
 
