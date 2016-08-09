@@ -9,20 +9,20 @@
 
 #The National Science Foundation
 
-#--------------------------------------------------------------
+### ------------------------------------------------------------
 
 #Preprocessing a .lig file from a Migrate Technology tag
 
 #First reduce the data down to just datestamps and light levels
 #use the readLig function in BAStag to read in the data
-
-library("BAStag")                                 #open the BAStag package
-d.lig <- readLig("data/749_000.lig", skip = 0)         #read the data into a dataframe called d.lig
+setwd("~/Documents/GitHub/NAOC_Geos_2016")
+library("TwGeos")                                 #load the BAStag package
+d.lig <- readLig("data/749_000.lig", skip = 0)    #read the data into a dataframe called d.lig
 d.lig <- subset(d.lig,select=c("Date","Light"))   #reduce the dataframe to just Date and Light
 
 #Lets view the data.
 #You can use the plot function to look at small pieces of the dataset.
-plot(d.lig$Date[3000:5000], d.lig$Light[3000:5000], type = "l")
+plot(d.lig$Date[3000:5000], d.lig$Light[3000:5000], type = "o", pch = 16, cex = 0.5)
 
 #For a more complete view use the lightimage() function in the BAStag package.
 #In this graph each vertical line is a day (24 hours) of data.
@@ -42,9 +42,11 @@ lightImage(d.lig, offset = 17, zlim = c(0, 64), dt = 120)
 threshold = 2.5
 
 #preprocessLight() is an interactive function for editing light data and deriving twilights
-#But it will not work with Rstudio sever.
+#But it will not work with Rstudio sever on a Mac.
 #You can try it on your own machine, but it is tricky with a Mac
-twl <- preprocessLight(d.lig, threshold = threshold)
+
+twl <- preprocessLight(d.lig, threshold = threshold, offset = 17, gr.Device = "x11")
+
 
 #You can use the twilightCalc() function in GeoLight to go through the data a bit at a time.
 #This can take a few minutes.
