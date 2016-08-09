@@ -11,6 +11,27 @@
 
 ### ------------------------------------------------------------
 
+
+### Read in data
+
+####################################################################
+#### Read in data from a .lig file from a Migrate Technology tag ###
+####################################################################
+
+
+d.tag<-readMTlux("data/A2_raw_data.lux")     #read the data into a dataframe called d.lux
+  d.tag$Light <- log(d.tag$Light) # Log transform for better representation of low ligth values
+head(d.tag)         #view the first few lines
+max(d.tag$Light)    #note the maximum value
+min(d.tag$Light)    #note the minimum value
+
+
+### Or
+
+####################################################################
+#### Read in data from a .lig file #################################
+####################################################################
+
 ## Preprocessing a .lig file from a Migrate Technology tag
 
 ## First reduce the data down to just datestamps and light levels
@@ -18,19 +39,29 @@
 
 setwd("~/Documents/GitHub/NAOC_Geos_2016")
 
-library("TwGeos")                                 #load the BAStag package
-d.lig <- readLig("data/749_000.lig", skip = 0)    #read the data into a dataframe called d.lig
-d.lig <- subset(d.lig,select=c("Date","Light"))   #reduce the dataframe to just Date and Light
+library("TwGeos")                                 #load the TwGeos package
+d.tag <- readLig("data/749_000.lig", skip = 0)    #read the data into a dataframe called d.tag
+d.tag <- subset(d.tag,select=c("Date","Light"))   #reduce the dataframe to just Date and Light
+
+
+### Or (from any other geolocator tag)
+
+### ----
+
 
 ## Lets view the data.
+
+  ## NOTE: The choice of the light threshold and min max light values for plotting will be
+  ## different between tags. The code below is optimized for the .lux file
+
 ## You can use the plot function to look at small pieces of the dataset.
-plot(d.lig$Date[3000:5000], d.lig$Light[3000:5000], type = "o", pch = 16, cex = 0.5)
+plot(d.tag$Date[3000:5000], d.tag$Light[3000:5000], type = "o", pch = 16, cex = 0.5)
 
 ## For a more complete view use the lightimage() function in the BAStag package.
 ## In this graph each vertical line is a day (24 hours) of data.
 ## Low light levels are shown in dark shades of gray and high levels are light shades.
 ## The offset value of 17 adjusts the y-axis to put night (dark shades) in the middle.
-lightImage(d.lig, offset = 17, zlim = c(0, 64), dt = 120) 
+lightImage(d.tag, offset = 12, zlim = c(0, 12), dt = 120) 
 ## Note the dark spots near the end of the dataset. These are probably associated with nesting (in a dark box).
 
 ## Options for editing twilights.
@@ -40,22 +71,24 @@ lightImage(d.lig, offset = 17, zlim = c(0, 64), dt = 120)
 
 ## Establish a threshold for determining twilights (what light value separates day and night?)
 ## The best choice is the lowest value that is consistently above any noise in the nighttime light levels
-## For many BAS data sets, 2.5 is a good threshold
-threshold = 2.5
+## For many Migrate Technology data sets, 0.5 is a good threshold (on log-transformed lux values)
+threshold = 0.5
 
 ## preprocessLight() is an interactive function for editing light data and deriving twilights
 ## Note: if you are working on a Mac set gr.Device to X11 and install Quartz first (https://www.xquartz.org)
 ## See help file for details on the interactive process.
 
-twl <- preprocessLight(d.lig, threshold = threshold, offset = 17, gr.Device = "x11")
+twl <- preprocessLight(d.tag, threshold = threshold, offset = 12, lmax = 12, gr.Device = "x11")
 
-## The TwGeos package also allows to just find the twiligth times (without individual insepction and without editing)
+q## The TwGeos package also allows to just find the twiligth times (without individual insepction and without editing)
 ## A so called 'seed' (see help file), date and time at night is required
-lightImage(d.lig, offset = 17, zlim = c(0, 64), dt = 120)
-seed <- as.POSIXct(locator(n=1)$x, origin  = "1970-01-01", tz = "GMT")
-twl  <- findTwilights(d.lig, threshold, include = seed)
 
-tsimagePoints(twl$Twilight, offset = 17, pch = 16, cex = 0.5,
+plot(d.tag$Date[3000:5000], d.tag$Light[3000:5000], type = "o", pch = 16, cex = 0.5)
+seed <- as.POSIXct(locator(n=1)$x, origin  = "1970-01-01", tz = "GMT")
+twl  <- findTwilights(d.tag, threshold, include = seed)
+
+lightImage(d.tag, offset = 12, zlim = c(0, 12), dt = 120)
+tsimagePoints(twl$Twilight, offset = 12, pch = 16, cex = 0.5,
               col = ifelse(twl$Rise, "dodgerblue", "firebrick"))
 
 ## The function twilightEdit may help to find outliers and either remove or edit them according to one rule:
@@ -69,6 +102,11 @@ twl <- twilightEdit(twl, window = 4, outlier.mins = 45, stationary.mins = 25, pl
 
   ## Plot: grey points are either deleted (crossed) or edited (moved) twiligth times
 
+## Plot the edited data on ligthImage
+lightImage(d.tag, offset = 12, zlim = c(0, 12), dt = 120)
+tsimagePoints(twl$Twilight[!twl$Deleted], offset = 12, pch = 16, cex = 0.5,
+              col = ifelse(twl$Rise[!twl$Deleted], "dodgerblue", "firebrick"))
+
 
 ## adjust twilight data since BAS tags record maximum values over time (in this case every 2 minutes)
 twl <- twilightAdjust(twl, 2*60)
@@ -79,7 +117,7 @@ twl <- twilightAdjust(twl, 2*60)
 ## twilightCalc tries to choose the most likely twilights, but it can be wrong.
 ## If you want to trust the function and not look at the data (not recommended) the set "ask" to "FALSE."
 library(GeoLight)    #load the GeoLight package
-twl <- findTwilights(datetime = d.lig$Date, light = d.lig$Light,
+twl <- findTwilights(datetime = d.tag$Date, light = d.tag$Light,
                     LightThreshold = threshold, ask = T, preSelection = TRUE, 
                     nsee = 5000, allTwilights = F)
 
@@ -94,13 +132,11 @@ twl <- twl[datetime < as.POSIXct("2012-05-20", "UTC"),]
 write.csv(twl, file = "data/749_twl.csv", quote = FALSE, row.names = FALSE)
 
 
-
 ## You can also use the online data editing tools in TAGS
 ## at tags.animalmigration.org
 ## To pre- process the dataset with TAGS it may be necessary 
 ## to compress the data (i.e. remove repeated light levels)
-d.lig.TAGS <- export2TAGS(d.lig, path = "~/Desktop")
-
+d.lig.TAGS <- export2TAGS(d.tag, path = "~/Desktop")
 
 
 ## Process the data with TAGS and read it back into R.
