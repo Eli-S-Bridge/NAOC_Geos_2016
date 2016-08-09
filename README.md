@@ -5,6 +5,8 @@ _2016 North American Ornithological Congress, Washington D.C._
 
 Sponsored by: 
 
+[<img src="MT_logo.gif" width="300">](http://www.migratetech.co.uk)
+
 Migrate Technology LLC.-- www.migratetech.co.uk
 
 The Cooper Ornithological Society
