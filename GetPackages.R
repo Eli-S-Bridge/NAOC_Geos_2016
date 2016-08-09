@@ -14,8 +14,7 @@ if(length(get.packages)>0) install.packages(get.packages,repos = "https://cloud.
 
 library(devtools)
 install_github("SWotherspoon/SGAT")
-install_github("SLisovski/TwGeos")
-install_github("SWotherspoon/BAStag") 
+install_github("SLisovski/TwGeos") 
 install_github("eldarrak/FLightR")
 
 
