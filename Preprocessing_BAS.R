@@ -66,7 +66,7 @@ twl <- preprocessLight(d.lig, threshold = threshold, offset = 18, lmax = 12, gr.
 #/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
 #------------------------------------------
 
-## The findTwilights function in TwGeos package just finds the twiligth times 
+## The findTwilights function in TwGeos package just finds the twiligtht times 
 ## (without individual insepction and without editing)
 ## A so called 'seed' is required, This is just a known date and time when you know it is night
 ## (see help file: "?findTwilights()").
@@ -109,7 +109,7 @@ twl <- twilightAdjust(twl, 2*60)
 ## twilightCalc tries to choose the most likely twilights, but it can be wrong.
 ## If you want to trust the function and not look at the data (not recommended) the set "ask" to "FALSE."
 library(GeoLight)    #load the GeoLight package
-twl <- findTwilights(datetime = d.lig$Date, light = d.lig$Light,
+twl <- twilightCalc(datetime = d.lig$Date, light = d.lig$Light,
                     LightThreshold = threshold, ask = T, preSelection = TRUE, 
                     nsee = 5000, allTwilights = F)
 
@@ -119,18 +119,26 @@ twl <- findTwilights(datetime = d.lig$Date, light = d.lig$Light,
 
 #Let's truncate the data to cut off the messy data at the end
 #and save it to a csv file for later use.
-datetime <- as.POSIXct(twl$tFirst, "UTC")  #Get datestamps into a format R can work with
-twl <- twl[datetime < as.POSIXct("2012-05-20", "UTC"),] 
-twl <- twilightAdjust(twl, 2*60)  #adjust times as before.
+twl <- twl[twl$tFirst < as.POSIXct("2012-05-20", "UTC"),] #keep only dates before May 20, 2012
+
+## The data are now tFirst/tSecond form. Let's convert to the "rise/set form
+twl <- data.frame(datetime = twl$tFirst, Rise = as.logical(abs(twl$type-2)))
+
+## so we can apply a time adjustment.
+twl$datetime[twl$Rise] <- twl$datetime[twl$Rise] - 2*60 #Does the same thing as twilightAdjust
+
+## save the data so we don't have to do all that again
 write.csv(twl, file = "data/749_twl.csv", quote = FALSE, row.names = FALSE)
 
+#------------------------------------------
+#/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
+#------------------------------------------
 
 ## You can also use the online data editing tools in TAGS
 ## at tags.animalmigration.org
 ## To pre- process the dataset with TAGS it may be necessary 
 ## to compress the data (i.e. remove repeated light levels)
-d.lig.TAGS <- export2TAGS(d.lig, path = "~/Desktop")
-
+d.lig.TAGS <- export2TAGS(d.lig, path = "data", file = "749_000_short")
 
 ## Process the data with TAGS and read it back into R.
 

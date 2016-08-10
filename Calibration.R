@@ -22,6 +22,12 @@ library(FLightR)
 #start by reading in a data set consisting of twilight times
 twl <- read.csv("data/749_twl.csv")
 
+#we need the data in tFirst/tSecond format
+
+twl <- data.frame(tFirst = twl$datetime[1:(nrow(twl)-1)],
+                  tSecond = twl$datetime[2:nrow(twl)],
+                  type = abs(twl$Rise[1:(nrow(twl)-1)]-2))
+
 #format the date columns
 twl$tFirst <- as.POSIXct(twl$tFirst, "UTC")   
 twl$tSecond <- as.POSIXct(twl$tSecond, "UTC")
@@ -53,7 +59,7 @@ tripMap(track, equinox = TRUE, xlim = c(-90,-70), ylim = c(10,50), legend = TRUE
 
 #You can also choose a calibration period from a light image
 
-library("BAStag")                                 #open the BAStag package
+library("TwGeos")                                 #open the BAStag package
 d.lux <- readLig("data/749_000.lig", skip = 0)         #read the data into a dataframe called d.lux
 d.lux <- subset(d.lux,select=c("Date","Light"))   #reduce the dataframe to just Date and Light
 

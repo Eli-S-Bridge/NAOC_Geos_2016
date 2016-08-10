@@ -15,7 +15,7 @@
 
 library(SGAT)
 library(MASS)  #needed for fitting distributions
-library(BAStag)
+library(TwGeos)
 library(GeoLight)
 
 #Start by getting a fast and simple map of locations:
@@ -27,8 +27,10 @@ d.lig$Date  <- as.POSIXct(d.lig$Date, "GMT")
 
 #We've already defined twilights... 
 twl <- read.csv("data/749_twl.csv")
-#...but they need to be reformatted
-twl <- data.frame(Twilight = as.POSIXct(twl$tFirst, "GMT"), Rise = twl$type %% 2, stringsAsFactors = F) #use modulus operator (%%) to transform 2 to 0 and 1 to 1
+#...but they need to be reformatted. 
+## SGAT uses a simple Twilight-Rise(T/F) format
+twl$datetime <- as.POSIXct(twl$datetime, "GMT")
+names(twl) <- c("Twilight", "Rise")
 
 lightImage(d.lig, offset = 19)
 tsimagePoints(twl$Twilight, offset = 19, pch = 16, cex = 0.5,
@@ -83,12 +85,11 @@ lines(1:100, dlnorm(1:100, fitml$estimate[1], fitml$estimate[2]), col = "firebri
 #If it looks good save the mean and standard deviation for the model
 alpha <- c(fitml$estimate[1], fitml$estimate[2]) ## Twilight model parameters
 
-
-#SIMEON
-#Need some help here. The zenith angle needs to be about 97 to get reasonable results
+#derive a zenth angle for sunrise (angle in degrees measured from directly overhead)
 zenith0 <- median(z) #used only for simple threshold map
 zenith0
 zenith  <- quantile(z, prob = .95)  #use the 95% of the zenith angles. Why??? This is too low a value
+zenith 
 
 path <- thresholdPath(twl$Twilight, twl$Rise, zenith = zenith, tol = 0.15)
 #have a quick look to see that it makes sense.
