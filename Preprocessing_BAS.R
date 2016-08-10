@@ -1,22 +1,22 @@
-## Geolocation analysis with Open Source Tools
-## 2016 North American Ornithological Congress, Washington D.C.
+#Geolocation analysis with Open Source Tools
+#2016 North American Ornithological Congress, Washington D.C.
 
-## Sponsored by: 
+#Sponsored by: 
 
-## Migrate Technology LLC.-- www.migratetech.co.uk
+#Migrate Technology LLC.-- www.migratetech.co.uk
 
-## The Cooper Ornithological Society
+#The Cooper Ornithological Society
 
-## The National Science Foundation
+#The National Science Foundation
 
-### ------------------------------------------------------------
+####################################################################
+#### Read in data from a .lIG file #################################
+####################################################################
 
-## Preprocessing a .lig file from a Migrate Technology tag
+# If necessary tell R where to find files.
+# setwd("~/NAOC_Geos_2016")
 
-## First reduce the data down to just datestamps and light levels
-## use the readLig function in BAStag to read in the data
-
-setwd("~/Documents/GitHub/NAOC_Geos_2016")
+## Use the readLig function in BAStag to read in the data
 
 library("TwGeos")                                 #load the BAStag package
 d.lig <- readLig("data/749_000.lig", skip = 0)    #read the data into a dataframe called d.lig
@@ -30,8 +30,12 @@ plot(d.lig$Date[3000:5000], d.lig$Light[3000:5000], type = "o", pch = 16, cex = 
 ## In this graph each vertical line is a day (24 hours) of data.
 ## Low light levels are shown in dark shades of gray and high levels are light shades.
 ## The offset value of 17 adjusts the y-axis to put night (dark shades) in the middle.
-lightImage(d.lig, offset = 17, zlim = c(0, 64), dt = 120) 
+lightImage(d.lig, offset = 18, zlim = c(0, 64), dt = 120) 
 ## Note the dark spots near the end of the dataset. These are probably associated with nesting (in a dark box).
+
+#------------------------------------------
+#/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
+#------------------------------------------
 
 ## Options for editing twilights.
 ##   preprocessLight() from the BAStag package
@@ -43,19 +47,38 @@ lightImage(d.lig, offset = 17, zlim = c(0, 64), dt = 120)
 ## For many BAS data sets, 2.5 is a good threshold
 threshold = 2.5
 
+#------------------------------------------
+#/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
+#------------------------------------------
+
 ## preprocessLight() is an interactive function for editing light data and deriving twilights
+## Unfortunately, it does not work with an RStudio web interface (i.e. a virtual machine)
 ## Note: if you are working on a Mac set gr.Device to X11 and install Quartz first (https://www.xquartz.org)
 ## See help file for details on the interactive process.
 
-twl <- preprocessLight(d.lig, threshold = threshold, offset = 17, gr.Device = "x11")
+## for pc
+twl <- preprocessLight(d.lig, threshold = threshold, offset = 18, lmax = 12, gr.Device = "default")
 
-## The TwGeos package also allows to just find the twiligth times (without individual insepction and without editing)
-## A so called 'seed' (see help file), date and time at night is required
-lightImage(d.lig, offset = 17, zlim = c(0, 64), dt = 120)
+## for mac
+twl <- preprocessLight(d.lig, threshold = threshold, offset = 18, lmax = 12, gr.Device = "x11")
+
+#------------------------------------------
+#/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
+#------------------------------------------
+
+## The findTwilights function in TwGeos package just finds the twiligth times 
+## (without individual insepction and without editing)
+## A so called 'seed' is required, This is just a known date and time when you know it is night
+## (see help file: "?findTwilights()").
+## You can establish the seed by graphing the data and clicking on a nightime period.
+
+plot(d.lig$Date[3000:5000], d.lig$Light[3000:5000], type = "o", pch = 16, cex = 0.5)
 seed <- as.POSIXct(locator(n=1)$x, origin  = "1970-01-01", tz = "GMT")
 twl  <- findTwilights(d.lig, threshold, include = seed)
 
-tsimagePoints(twl$Twilight, offset = 17, pch = 16, cex = 0.5,
+## See if it worked
+lightImage(d.lig, offset = 18, zlim = c(0, 12), dt = 120)
+tsimagePoints(twl$Twilight, offset = 12, pch = 16, cex = 0.5,
               col = ifelse(twl$Rise, "dodgerblue", "firebrick"))
 
 ## The function twilightEdit may help to find outliers and either remove or edit them according to one rule:
@@ -67,12 +90,19 @@ tsimagePoints(twl$Twilight, offset = 17, pch = 16, cex = 0.5,
 ## This allows fast and easily reproducable definition of twilight times.
 twl <- twilightEdit(twl, window = 4, outlier.mins = 45, stationary.mins = 25, plot = T)
 
-  ## Plot: grey points are either deleted (crossed) or edited (moved) twiligth times
+## Plot: grey points are either deleted (crossed) or edited (moved) twiligth times
 
+## Plot the edited data on ligthImage
+lightImage(d.lig, offset = 18, zlim = c(0, 12), dt = 120)
+tsimagePoints(twl$Twilight[!twl$Deleted], offset = 18, pch = 16, cex = 0.5,
+              col = ifelse(twl$Rise[!twl$Deleted], "dodgerblue", "firebrick"))
 
-## adjust twilight data since BAS tags record maximum values over time (in this case every 2 minutes)
+## adjust twilight data since this tag records maximum values over time (in this case every 2 minutes)
 twl <- twilightAdjust(twl, 2*60)
 
+#------------------------------------------
+#/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
+#------------------------------------------
 
 ## You can use the twilightCalc() function in GeoLight to go through the data a bit at a time.
 ## This can take a few minutes.
@@ -91,8 +121,8 @@ twl <- findTwilights(datetime = d.lig$Date, light = d.lig$Light,
 #and save it to a csv file for later use.
 datetime <- as.POSIXct(twl$tFirst, "UTC")  #Get datestamps into a format R can work with
 twl <- twl[datetime < as.POSIXct("2012-05-20", "UTC"),] 
+twl <- twilightAdjust(twl, 2*60)  #adjust times as before.
 write.csv(twl, file = "data/749_twl.csv", quote = FALSE, row.names = FALSE)
-
 
 
 ## You can also use the online data editing tools in TAGS
@@ -100,7 +130,6 @@ write.csv(twl, file = "data/749_twl.csv", quote = FALSE, row.names = FALSE)
 ## To pre- process the dataset with TAGS it may be necessary 
 ## to compress the data (i.e. remove repeated light levels)
 d.lig.TAGS <- export2TAGS(d.lig, path = "~/Desktop")
-
 
 
 ## Process the data with TAGS and read it back into R.

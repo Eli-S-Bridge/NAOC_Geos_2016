@@ -9,14 +9,17 @@
 
 #The National Science Foundation
 
-#--------------------------------------------------------------
+####################################################################
+#### Read in data from a .lux file from a Migrate Technology tag ###
+####################################################################
 
-#Preprocessing a .lux file from a Migrate Technology tag
+# If necessary tell R where to find files.
+# setwd("~/NAOC_Geos_2016")
 
 #First reduce the data down to just datestamps and light levels
-#use the readMTlux function in BAStag to read in the data
+#use the readMTlux function in TwGeos to read in the data
 
-library("BAStag")   #open the BAStag package
+library("TwGeos")
 d.lux<-readMTlux("data/A2_raw_data.lux")     #read the data into a dataframe called d.lux
 head(d.lux)         #view the first few lines
 max(d.lux$Light)    #note the maximum value
@@ -32,7 +35,7 @@ d.lux$Light<-log(d.lux$Light)
 #Now try the simple plot again
 plot(d.lux$Date[7000:8000], d.lux$Light[7000:8000], type = "l")
 
-#For a more complete view use the lightimage() function in the BAStag package.
+#For a more complete view use the lightimage() function in the TwGeos package.
 #In this graph each vertical line is a day (24 hours) of data.
 #Low light levels are shown in dark shades of gray and high levels are light shades.
 #The offset value of 12 adjusts the y-axis to put night (dark shades) in the middle.
@@ -41,9 +44,12 @@ lightImage(d.lux, offset = 12, zlim = c(0, max(d.lux$Light)), dt = 120)
 #These are probably associated with nesting and the pre/post deployment period.
 
 #------------------------------------------
+#/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
+#------------------------------------------
 
 #Options for editing twilights.
-#   preprocessLight() from the BAStag package
+#   preprocessLight() from the TwGeos package
+#   findTwilights() from the TwGeos package
 #   twilightCalc() from the GeoLight package
 #   TAGS - a web-based editor
 
@@ -52,11 +58,64 @@ lightImage(d.lux, offset = 12, zlim = c(0, max(d.lux$Light)), dt = 120)
 #For this log transformed LUX tag a good choice appears to be 1.5 which is about the same as log(4.5)
 threshold = log(4.5)
 
-#preprocessLight() is an interactive function for editing light data and derivign twilights
-#But it will not work with Rstudio sever.
-#You can try it on your own machine, but it is tricky with a Mac
-twl <- preprocessLight(d.lux, threshold = threshold)
+#------------------------------------------
+#/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
+#------------------------------------------
 
+## preprocessLight() is an interactive function for editing light data and deriving twilights
+## Unfortunately, it does not work with an RStudio web interface (i.e. a virtual machine)
+## Note: if you are working on a Mac set gr.Device to X11 and install Quartz first (https://www.xquartz.org)
+## See help file for details on the interactive process.
+
+## for pc
+twl <- preprocessLight(d.lux, threshold = threshold, offset = 18, lmax = 12, gr.Device = "default")
+
+## for mac
+twl <- preprocessLight(d.lux, threshold = threshold, offset = 18, lmax = 12, gr.Device = "x11")
+
+
+#------------------------------------------
+#/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
+#------------------------------------------
+
+## The findTwilights function in TwGeos package just finds the twiligth times 
+## (without individual insepction and without editing)
+## A so called 'seed' is required, This is just a known date and time when you know it is night
+## (see help file: "?findTwilights()").
+## You can establish the seed by graphing the data and clicking on a nightime period.
+
+plot(d.lux$Date[3000:5000], d.lux$Light[3000:5000], type = "o", pch = 16, cex = 0.5)
+seed <- as.POSIXct(locator(n=1)$x, origin  = "1970-01-01", tz = "GMT")
+twl  <- findTwilights(d.lux, threshold, include = seed)
+
+## See if it worked
+lightImage(d.lux, offset = 12, zlim = c(0, 12), dt = 120)
+tsimagePoints(twl$Twilight, offset = 12, pch = 16, cex = 0.5,
+              col = ifelse(twl$Rise, "dodgerblue", "firebrick"))
+
+## The function twilightEdit may help to find outliers and either remove or edit them according to one rule:
+## rule: if a twilight time is 'outlier.mins' (e.g. 45) minutes different to its sourrounding twilight times, 
+## defined by 'window' - the number of sourrounding twilight times (e.g. 4), and the sourrounding twiligth times 
+## are within 'stationary.mins' (e.g. 15) minutes, the outlayer will be moved in between the two neighboring twilights
+## or deleted if the sourrounding twilights are > 'stationary.mins'.
+
+## This allows fast and easily reproducable definition of twilight times.
+twl <- twilightEdit(twl, window = 4, outlier.mins = 45, stationary.mins = 25, plot = T)
+
+## Plot: grey points are either deleted (crossed) or edited (moved) twiligth times
+
+## Plot the edited data on ligthImage
+lightImage(d.lux, offset = 12, zlim = c(0, 12), dt = 120)
+tsimagePoints(twl$Twilight[!twl$Deleted], offset = 12, pch = 16, cex = 0.5,
+              col = ifelse(twl$Rise[!twl$Deleted], "dodgerblue", "firebrick"))
+
+
+## adjust twilight data since this tag records maximum values over time (in this case every 5 minutes)
+twl <- twilightAdjust(twl, 5*60)
+
+#------------------------------------------
+#/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
+#------------------------------------------
 
 #You can use the twilightCalc() function in GeoLight to go through the data a bit at a time.
 #This can take a few minutes.
@@ -95,8 +154,9 @@ twl <- twl[datetime < as.POSIXct("2014-05-16", "GMT") & datetime > as.POSIXct("2
 write.csv(twl$allTwilights, file = "data/A2_twl_FlightR.csv", quote = FALSE, row.names = FALSE)
 
 
-
-
+#------------------------------------------
+#/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
+#------------------------------------------
 
 # To pre- process the dataset with TAGS it may be necessary to compress the data (i.e. remove repeated light levels)
 source("Geolocator_compression.R")
