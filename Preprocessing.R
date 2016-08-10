@@ -11,6 +11,8 @@
 
 ### ------------------------------------------------------------
 
+# Tell R where to find files.
+setwd("~/Documents/GitHub/NAOC_Geos_2016")
 
 ### Read in data
 
@@ -18,41 +20,21 @@
 #### Read in data from a .lig file from a Migrate Technology tag ###
 ####################################################################
 
-
+library("TwGeos")
 d.tag<-readMTlux("data/A2_raw_data.lux")     #read the data into a dataframe called d.lux
-  d.tag$Light <- log(d.tag$Light) # Log transform for better representation of low ligth values
 head(d.tag)         #view the first few lines
 max(d.tag$Light)    #note the maximum value
 min(d.tag$Light)    #note the minimum value
 
-
-### Or
-
-####################################################################
-#### Read in data from a .lig file #################################
-####################################################################
-
-## Preprocessing a .lig file from a Migrate Technology tag
-
-## First reduce the data down to just datestamps and light levels
-## use the readLig function in BAStag to read in the data
-
-setwd("~/Documents/GitHub/NAOC_Geos_2016")
-
-library("TwGeos")                                 #load the TwGeos package
-d.tag <- readLig("data/749_000.lig", skip = 0)    #read the data into a dataframe called d.tag
-d.tag <- subset(d.tag,select=c("Date","Light"))   #reduce the dataframe to just Date and Light
-
-
-### Or (from any other geolocator tag)
-
-### ----
-
+d.tag$Light <- log(d.tag$Light) # Log transform for better representation of low light values
+head(d.tag)         #view the first few lines
+max(d.tag$Light)    #note the maximum value
+min(d.tag$Light)    #note the minimum value
 
 ## Lets view the data.
 
-  ## NOTE: The choice of the light threshold and min max light values for plotting will be
-  ## different between tags. The code below is optimized for the .lux file
+## NOTE: The choice of the light threshold and min max light values for plotting will be
+## different between tags. The code below is optimized for the .lux file
 
 ## You can use the plot function to look at small pieces of the dataset.
 plot(d.tag$Date[3000:5000], d.tag$Light[3000:5000], type = "o", pch = 16, cex = 0.5)
@@ -75,13 +57,18 @@ lightImage(d.tag, offset = 12, zlim = c(0, 12), dt = 120)
 threshold = 0.5
 
 ## preprocessLight() is an interactive function for editing light data and deriving twilights
+## Unfortunately, it does not work with an RStudio web interface (i.e. a virtual machine)
 ## Note: if you are working on a Mac set gr.Device to X11 and install Quartz first (https://www.xquartz.org)
 ## See help file for details on the interactive process.
 
-twl <- preprocessLight(d.tag, threshold = threshold, offset = 12, lmax = 12, gr.Device = "x11")
+## for pc
+twl <- preprocessLight(d.tag, threshold = threshold, offset = 18, lmax = 12, gr.Device = "default")
 
-q## The TwGeos package also allows to just find the twiligth times (without individual insepction and without editing)
-## A so called 'seed' (see help file), date and time at night is required
+## for mac
+twl <- preprocessLight(d.tag, threshold = threshold, offset = 18, lmax = 12, gr.Device = "x11")
+
+## The findTwilights function in TwGeos package also allows to just find the twiligth times (without individual insepction and without editing)
+## A so called 'seed' (see help file: ?findTwilights()), date and time at night is required
 
 plot(d.tag$Date[3000:5000], d.tag$Light[3000:5000], type = "o", pch = 16, cex = 0.5)
 seed <- as.POSIXct(locator(n=1)$x, origin  = "1970-01-01", tz = "GMT")
@@ -149,6 +136,58 @@ datetime <- strptime(twl$datetime, "%Y-%m-%dT%H:%M:%OSZ", "GMT")     #Get datest
 twl <- twl[datetime < as.POSIXct("2012-05-20", "GMT"),]              #Remove data logged after Apr 20, 2012
 ## These data are in TAGS format, which FlightR can work with. So lets save them.
 write.csv(twl, file = "data/749_twl_FlightR.csv", quote = FALSE, row.names = FALSE)
+
+
+
+
+####################################################################
+#### Read in data from a .lig file #################################
+####################################################################
+
+## Preprocessing a .lig file
+
+## First reduce the data down to just datestamps and light levels
+## use the readLig function in BAStag to read in the data
+
+library("TwGeos")                                 #load the TwGeos package
+d.tag <- readLig("data/749_000.lig", skip = 0)    #read the data into a dataframe called d.tag
+d.tag <- subset(d.tag,select=c("Date","Light"))   #reduce the dataframe to just Date and Light
+
+## Lets view the data.
+
+## NOTE: The choice of the light threshold and min max light values for plotting will be
+## different between tags. The code below is optimized for the .lux file
+
+## You can use the plot function to look at small pieces of the dataset.
+plot(d.tag$Date[3000:5000], d.tag$Light[3000:5000], type = "o", pch = 16, cex = 0.5)
+
+## For a more complete view use the lightimage() function in the BAStag package.
+## In this graph each vertical line is a day (24 hours) of data.
+## Low light levels are shown in dark shades of gray and high levels are light shades.
+## The offset value of 17 adjusts the y-axis to put night (dark shades) in the middle.
+lightImage(d.tag, offset = 18, zlim = c(0, 12), dt = 120) 
+## Note the dark spots near the end of the dataset. These are probably associated with nesting (in a dark box).
+
+## Options for editing twilights.
+##   preprocessLight() from the BAStag package
+##   twilightCalc() from the GeoLight package
+##   TAGS - a web-based editor
+
+## Establish a threshold for determining twilights (what light value separates day and night?)
+## The best choice is the lowest value that is consistently above any noise in the nighttime light levels
+## For many BAS data sets, 2.5 is a good threshold
+threshold = 2.5
+
+## preprocessLight() is an interactive function for editing light data and deriving twilights
+## Unfortunately, it does not work with an RStudio web interface (i.e. a virtual machine)
+## Note: if you are working on a Mac set gr.Device to X11 and install Quartz first (https://www.xquartz.org)
+## See help file for details on the interactive process.
+
+## for pc
+twl <- preprocessLight(d.tag, threshold = threshold, offset = 18, lmax = 12, gr.Device = "default")
+
+## for mac
+twl <- preprocessLight(d.tag, threshold = threshold, offset = 18, lmax = 12, gr.Device = "x11")
 
 
 
