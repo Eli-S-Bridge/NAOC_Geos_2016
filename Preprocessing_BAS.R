@@ -73,7 +73,7 @@ twl <- preprocessLight(d.lig, threshold = threshold, offset = 18, lmax = 12, gr.
 ## You can establish the seed by graphing the data and clicking on a nightime period.
 
 plot(d.lig$Date[3000:5000], d.lig$Light[3000:5000], type = "o", pch = 16, cex = 0.5)
-seed <- as.POSIXct(locator(n=1)$x, origin  = "1970-01-01", tz = "GMT")
+seed <- as.POSIXct(locator(n=1)$x, origin  = "1970-01-01", tz = "GMT") # click at any time during the night
 twl  <- findTwilights(d.lig, threshold, include = seed)
 
 ## See if it worked
@@ -90,7 +90,7 @@ tsimagePoints(twl$Twilight, offset = 12, pch = 16, cex = 0.5,
 ## This allows fast and easily reproducable definition of twilight times.
 twl <- twilightEdit(twl, window = 4, outlier.mins = 45, stationary.mins = 25, plot = T)
 
-## Plot: grey points are either deleted (crossed) or edited (moved) twiligth times
+## In this plot, grey points are either deleted (crossed) or edited (moved) twiligth times
 
 ## Plot the edited data on ligthImage
 lightImage(d.lig, offset = 18, zlim = c(0, 12), dt = 120)
@@ -119,8 +119,8 @@ twl <- findTwilights(datetime = d.lig$Date, light = d.lig$Light,
 
 #Let's truncate the data to cut off the messy data at the end
 #and save it to a csv file for later use.
-datetime <- as.POSIXct(twl$tFirst, "UTC")  #Get datestamps into a format R can work with
-twl <- twl[datetime < as.POSIXct("2012-05-20", "UTC"),] 
+datetime <- as.POSIXct(twl$tFirst, "GMT")  #Get datestamps into a format R can work with
+twl <- twl[datetime < as.POSIXct("2012-05-20", "GMT"),] 
 twl <- twilightAdjust(twl, 2*60)  #adjust times as before.
 write.csv(twl, file = "data/749_twl.csv", quote = FALSE, row.names = FALSE)
 

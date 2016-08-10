@@ -20,14 +20,18 @@
 # install_github("SLisovski/GeoLight", ref = "Update_2.01", force = T)
 
 library(GeoLight)
+library(TwGeos)
 
 ## For a fast and simple map of locations:
 ## Call up the twlight data
 twl <- read.csv("data/749_twl.csv")
 
 ## make sure the datetime columns are in the correct format
-twl$tFirst <- as.POSIXct(twl$tFirst, "GMT")   
-twl$tSecond <- as.POSIXct(twl$tSecond, "GMT")
+twl$Twilight <- as.POSIXct(twl$Twilight, "GMT")   
+  
+## transformt into GeoLight format
+twl <- export2GeoLight(twl)
+
 
 ## provide a sun angle for the light threshold value 
 cal1 = -5.52
