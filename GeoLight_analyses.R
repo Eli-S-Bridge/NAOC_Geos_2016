@@ -27,26 +27,16 @@ library(TwGeos)
 twl <- read.csv("data/749_twl.csv")
 ## Format the date/time data
 twl$datetime <- as.POSIXct(twl$datetime, "GMT") 
-
-<<<<<<< HEAD
-## GeoLight needs the data in tFirst/tSecond format
-twl <- data.frame(tFirst = twl$datetime[1:(nrow(twl)-1)],
-                  tSecond = twl$datetime[2:nrow(twl)],
-                  type = abs(twl$Rise[1:(nrow(twl)-1)]-2))
-=======
-## make sure the datetime columns are in the correct format
-twl$Twilight <- as.POSIXct(twl$Twilight, "GMT")   
+  names(twl) <- c("Twilight", "Rise")
   
 ## transformt into GeoLight format
 twl <- export2GeoLight(twl)
-
->>>>>>> d6d8a4786cb712f77d707b5a8dd32400cc3f4c8d
 
 ## provide a sun angle for the light threshold value 
 cal1 = -5.52
 
 ## generate tracking data
-track <- coord(twl = twl, degElevation = cal1, tol = 0,
+track <- coord(twl, degElevation = cal1, tol = 0,
                method = "NOAA", note = TRUE)
 
 ## plot a map
@@ -106,13 +96,14 @@ cl <- changeLight(twl[all.filt, ], quantile = 0.9, days = 5, plot = TRUE, summar
     siteMap(track[all.filt, ], cl$site, type = "cross", hull = T, xlim = c(-90,-70), ylim = c(10,50), legend = TRUE)
 
 ## 2) mergeSites
-ms <- mergeSites(twl[all.filt,], site = cl$site, degElevation = cal1, distThreshold = 75)
-  siteMap(track[all.filt,], ms$site, type = "cross", hull = F, xlim = c(-84,-75), ylim = c(20,55), legend = TRUE,
-          pch = 16, cex  = 2, col = rainbow(9, start = 0.2, end = 0.8))
+ms <- mergeSites(twl[all.filt,], site = cl$site, degElevation = cal1, distThreshold = 150)
+  siteMap(track[all.filt,], ms$site, type = "cross", hull = F, xlim = c(-84,-75), ylim = c(20,50), legend = TRUE,
+          pch = 16, cex  = 2, col = rainbow(length(unique(ms$site))-1, start = 0.2, end = 0.8))
 
-  arrows(x0 = c(-80.36, -78.26, -77.09, -80.85), y0 = c(42.4, 38.57, 35.77, 25.74), 
-         x1 = c(-78.66, -77.13, -80.42, -80.66), y1 = c(39.23, 36.70, 24.92, 38.689))
+  arrows(x0 = c(-79.93, -77.98, -77.05, -80.47), y0 = c(42.53, 38.89, 36.09, 25.42), 
+         x1 = c(-78.50, -77.08, -80.42, -80.22), y1 = c(39.57, 37.25, 24.18, 40.37))
   
+
 ## Schedule extracts the time of 'arrival' and 'departure' at the sites
 ## NOTE: the dates have to be treated very carefully and should only be used as a rough estimate.
 schedule(twl[all.filt,1], twl[all.filt,2], ms$site)
