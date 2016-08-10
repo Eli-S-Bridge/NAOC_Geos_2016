@@ -15,6 +15,7 @@ if(length(get.packages)>0) install.packages(get.packages,repos = "https://cloud.
 library(devtools)
 install_github("SWotherspoon/SGAT")
 install_github("SLisovski/TwGeos") 
+install_github("SLisovski/GeoLight", ref = "Update_2.01", force = T)
 install_github("eldarrak/FLightR")
 
 
