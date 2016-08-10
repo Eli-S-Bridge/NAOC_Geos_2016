@@ -1,0 +1,153 @@
+---
+title: Geolocation analysis with Open Source Tools 2016 North American Ornithological Congress, Washington D.C.
+output: 
+ html_document:
+    theme: "journal"
+    toc: true
+    toc_float: true
+---
+
+**Sponsored by:**  
+
+ *Migrate Technology LLC.-- <a href="www.migratetech.co.uk">www.migratetech.co.uk</a>*    
+ 
+ *The Cooper Ornithological Society*    
+ 
+ *The National Science Foundation*
+ 
+<img src="MT_logo.gif" width = 300/> <img src="COS.png" width=200/> <img src="NSF.gif" width=200/>
+
+
+## Loading required packages
+Be sure to acquire all required packages prior to running this analysis. See the <a href="https://github.com/Eli-S-Bridge/NAOC_Geos_2016/blob/master/GetPackages.R">GetPackages.R script</a>  to download all required packages if you haven't done so already. 
+
+```{r message = FALSE, warning = FALSE}
+library(SGAT)
+library(BAStag)
+library(GeoLight)
+library(FLightR)
+```
+
+## Reading in the data
+
+Here we read in the pre-processed data and calibration data - see <a href="https://github.com/Eli-S-Bridge/NAOC_Geos_2016/blob/master/Preprocessing.R">Preprocessing script</a> and <a href="https://github.com/Eli-S-Bridge/NAOC_Geos_2016/blob/master/Calibrartion.R">Calibration script</a> for more details.
+
+```{r}
+# opens and formats data straight from TAGS formatted csv file
+Proc.data<-get.tags.data("data/A2_FLightR_twl.csv") 
+
+#loads object called Calibration
+load("data/FLightR_calibration") 
+```
+
+Here are what the data look like
+
+```{r echo = FALSE}
+str(Proc.data)
+```
+
+
+# Establishing spatial grid 
+
+Here we establish a spatial grid and rules for possible migration paths. The default resolution is 50 x 50km grid cells. The inputs or terms for `left`, `right`, `bottom` and `top` define your bounding box. The argument `distance.from.land.allowed.to.use` should be a vector with length of two. The first number is a negative distance allowed to use while over land (restricts birds to flying only over coastlines and water) and second is distance from land allowed to use while over water (restricts birds to flying only over coastlines and land). The `distance.from.land.allowed.to.stay` should also be a vector of length two. The first number is negative distance where the bird is allowed to be stationary (restricts birds to landing only on coastlines and land). The second value is distance from land allowed to fly over during twilight while over water (restricts birds to landing only on coastlines and water). Use infinity `c(-Inf,Inf)` to not use any restrictions. We won't restrict paths for this example here. 
+
+```{r}
+Grid<-make.grid(left=-14, 
+                bottom=30,
+                right=13, 
+                top=57,
+                #Use infinity to withold restrictions on migration paths
+                distance.from.land.allowed.to.use=c(-Inf, Inf),  
+                distance.from.land.allowed.to.stay=c(-Inf, Inf))
+```
+
+
+# Create a proposal 
+
+Here we create an array of settings and data that incorporates all the objects created at earlier steps:    
+
+    - the light data with the detected twilight events (Proc.data)    
+    - the spatial parameters (Grid)    
+    - geographic coordinates of the starting location (start)    
+    - the calibration parameters (Calibration)    
+    
+This can take a while
+
+
+```{r message = FALSE}
+Sys.time()
+a<-Sys.time()
+
+all.in<-make.prerun.object(Proc.data = Proc.data, 
+                           Grid = Grid, 
+                           start = c(5.43, 52.93), # c(Longitude, Latitude)
+                           Calibration = Calibration)
+
+Sys.time()-a
+```
+
+# Running the Particle Filter
+
+Here is where the results are calculated (coordinates, behavior, stationarity). Within the `run.particle.filter` function, the following parameters can be preset:    
+
+    -number of particles (1e4 is recommended for test and 1e6 for the analysis)     
+    -known.last = TRUE if you know the track ends where it began  (FALSE is the default) 
+    -check.outliers = TRUE, for the "on a fly" discard of outliers (only recommended to make pretty maps).
+
+
+```{r, message=FALSE,warning=FALSE,error=FALSE}
+nParticles=1e4     #just a quick trial
+
+a <- Sys.time()     
+
+Result <- run.particle.filter(all.out = all.in, 
+                              threads=-1,
+                              nParticles=nParticles, 
+                              known.last=TRUE,
+                              precision.sd=25, 
+                              check.outliers=FALSE)
+Sys.time() - a
+```
+
+Save your results as an RData object
+
+```{r, eval = FALSE}
+save(Result, file="data/A2_FLightR_results.RData")
+load("data/A2_FLightR_results.RData")
+```
+
+
+# Plot the results
+
+Plot a simple map 
+```{r message=FALSE}
+#Plot a simple map
+map.FLightR.ggmap(Result)
+```
+
+Plot and save a simple map
+```{r eval=FALSE}
+map.FLightR.ggmap(Result, save.options = list(filename = "data/FLightR.map.pdf"))
+```
+```{r echo=FALSE,message=FALSE}
+map.FLightR.ggmap(Result)
+```
+
+Generate a plot that shows the longitude and latitude throughout the tracking period 
+```{r}
+plot.lon.lat(Result)
+```
+
+***
+> #### Exercise:
+> Try restricting the migratory path to include only land as stationary periods.  
+> Where in the process would you set that?
+> Do the results differ? If so, how they differ?  
+
+***
+<img src="MT_logo.gif" width = 300/> <img src="COS.png" width=200/> <img src="NSF.gif" width=200/>
+
+
+
+
+
