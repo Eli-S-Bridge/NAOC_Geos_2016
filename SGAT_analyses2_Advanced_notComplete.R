@@ -1,3 +1,20 @@
+## Geolocation analysis with Open Source Tools
+## 2016 North American Ornithological Congress, Washington D.C.
+
+## Sponsored by: 
+
+## Migrate Technology LLC.-- www.migratetech.co.uk
+
+## The Cooper Ornithological Society
+
+## The National Science Foundation
+
+#--------------------------------------------------------------
+#/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ 
+#--------------------------------------------------------------
+
+## SGAT ADVANCED analysis WITH land mask.
+
 
 # What if we know the birds are stationary from 1 December to 1 February?
 # It is possible to do a grouped analysis and specify that there is no movement 
@@ -37,11 +54,6 @@ proposal.z <- mvnorm(S=diag(c(0.005,0.005)),n=nlocation(z0))
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # THIS FAILS!!!
 fit <- estelleMetropolis(model,proposal.x,proposal.z,iters=200,thin=20,chains=1)
-
-
-
-
-
 
 
 #TUNING

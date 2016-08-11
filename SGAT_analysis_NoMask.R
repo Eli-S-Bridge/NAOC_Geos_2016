@@ -9,9 +9,11 @@
 
 ## The National Science Foundation
 
-## --------------------------------------------------------------
+#--------------------------------------------------------------
+#/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ 
+#--------------------------------------------------------------
 
-## SGAT analyses.
+## SGAT analysis WITHOUT a land mask.
 
 library(SGAT)
 library(MASS)  #needed for fitting distributions
@@ -145,51 +147,6 @@ z0 <- trackMidpts(x0) # update z0 positions
 
 
 
-### Spatial mask ### (not nessesarily needed)
-
-## Function to create gridded binary mask
-land.mask <- function(xlim, ylim, n = 4, land = TRUE) {
-  #Create a raster grid of "NA" that fills the x and y limits. Use a lat/lon projections
-  #resolution is 1/n degrees
-  r <- raster(nrows = n * diff(ylim), ncols = n * diff(xlim), xmn = xlim[1], 
-              xmx = xlim[2], ymn = ylim[1], ymx = ylim[2], crs = proj4string(wrld_simpl))
-  #Replace the NA values with 1 where there is land
-  #This code is kind of complicated because it allows for grids that wrap around the date line
-  r <- cover(rasterize(elide(wrld_simpl, shift = c(-360, 0)), r, 1, silent = TRUE), 
-             rasterize(wrld_simpl, r, 1, silent = TRUE), 
-             rasterize(elide(wrld_simpl, shift = c(360, 0)), r, 1, silent = TRUE))
-  
-  #make the raster a matrix with column order reversed and NA set to TRUE
-  r <- as.matrix(is.na(r))[nrow(r):1, ]
-  
-  if (land) #reverse the TRUE/FALSE if land is set to TRUE
-    r <- !r
-  
-  #Define all the x and y bins for the matrix so you can look up a particular value
-  xbin <- seq(xlim[1], xlim[2], length = ncol(r) + 1)
-  ybin <- seq(ylim[1], ylim[2], length = nrow(r) + 1)
-  
-  #This function just fits p into the appropriat bins in the grid and returns TRUE or FALSE. 
-  function(p) {
-    r[cbind(.bincode(p[, 2], ybin), .bincode(p[, 1], xbin))]
-  }
-}
-
-## create mask within boundaries
-xlim = c(-90,-70)
-ylim = c(10,50)
-
-is.land <- land.mask(xlim = xlim, ylim = ylim, n = 4, land = T)
-
-## Make another function that define the log prior for x and z coordinates
-log.prior <- function(p) {
-  f <- is.land(p)                       # f will be TRUE, FALSE, or NA.
-  ifelse(!f | is.na(f), log(1), log(7))  # If f is TRUE, then the prior is log(7),
-                                        #  otherwise it's log(1) - meaning that locations on land are 7 times higher than at sea. 
-}                                       # You can change these values as needed
-
-
-
 #### Finally! THE ESTELLE MODEL!! ####
 
 ## The threshold.model function requires the following
@@ -205,7 +162,6 @@ log.prior <- function(p) {
 model <- thresholdModel(twl$Twilight, twl$Rise,
                         twilight.model = "ModifiedLogNormal",
                         alpha = alpha, beta = beta,
-                        logp.x = log.prior, logp.z = log.prior, # not nessesary of no mask is required
                         x0 = x0,z0 = z0,zenith = zenith,fixedx = fixedx)
 
 proposal.x <- mvnorm(S=diag(c(0.005,0.005)),n=nlocation(x0))  #specify a multivariate normal distribution for the sampler
@@ -229,7 +185,6 @@ z0 <- chainLast(fit$z)
 
 ## Note that the model uses a not-so-forgiving LogNormal distribution now.
 model <- thresholdModel(twl$Twilight, twl$Rise, twilight.model = "LogNormal",
-                        logp.x = log.prior, logp.z = log.prior,
                         alpha = alpha, beta = beta, x0 = x0, z0 = z0, zenith = zenith, 
                         fixedx = fixedx)
 
