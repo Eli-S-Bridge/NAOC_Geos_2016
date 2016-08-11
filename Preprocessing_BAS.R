@@ -119,7 +119,7 @@ twl <- twilightCalc(datetime = d.lig$Date, light = d.lig$Light,
 
 #Let's truncate the data to cut off the messy data at the end
 #and save it to a csv file for later use.
-<<<<<<< HEAD
+
 twl <- twl[twl$tFirst < as.POSIXct("2012-05-20", "UTC"),] #keep only dates before May 20, 2012
 
 ## The data are now tFirst/tSecond form. Let's convert to the "rise/set form
@@ -129,11 +129,11 @@ twl <- data.frame(datetime = twl$tFirst, Rise = as.logical(abs(twl$type-2)))
 twl$datetime[twl$Rise] <- twl$datetime[twl$Rise] - 2*60 #Does the same thing as twilightAdjust
 
 ## save the data so we don't have to do all that again
-=======
+
 datetime <- as.POSIXct(twl$tFirst, "GMT")  #Get datestamps into a format R can work with
 twl <- twl[datetime < as.POSIXct("2012-05-20", "GMT"),] 
 twl <- twilightAdjust(twl, 2*60)  #adjust times as before.
->>>>>>> d6d8a4786cb712f77d707b5a8dd32400cc3f4c8d
+
 write.csv(twl, file = "data/749_twl.csv", quote = FALSE, row.names = FALSE)
 
 #------------------------------------------

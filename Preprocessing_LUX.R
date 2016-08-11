@@ -78,7 +78,7 @@ twl <- preprocessLight(d.lux, threshold = threshold, offset = 18, lmax = 12, gr.
 #/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
 #------------------------------------------
 
-## The findTwilights function in TwGeos package just finds the twiligth times 
+## The findTwilights function in TwGeos package just finds the twilight times 
 ## (without individual insepction and without editing)
 ## A so called 'seed' is required, This is just a known date and time when you know it is night
 ## (see help file: "?findTwilights()").
@@ -126,7 +126,6 @@ twl <- twilightCalc(datetime = d.lux$Date, light = d.lux$Light,
                     LightThreshold = threshold, ask = TRUE, preSelection = TRUE, 
                     nsee = 3000, allTwilights = FALSE)
 
-
 head(twl)          #view the twilight data
 class(twl$tFirst)  #make sure the dates are in POSIXct format (they are)
 #These data are already formatted for GeoLight, so lets save it.
@@ -146,13 +145,12 @@ twl <- data.frame(datetime = format(twl$tFirst, format = "%Y-%m-%dT%H:%M:%S.000Z
 twl <- rbind(d.lux,twl)                        
 twl <- twl[order(as.character(twl$datetime)),]
 
-#As we did above, lets remove the useless data from the beginning and end of the data set
-datetime <- strptime(twl$datetime, "%Y-%m-%dT%H:%M:%OSZ", "GMT")  #Get datestamps into a format R can work with
-twl <- twl[datetime < as.POSIXct("2014-05-16", "GMT") & datetime > as.POSIXct("2013-06-11", "GMT"),]           #Remove data logged after Apr 20, 2012
+#Lets remove the useless data from the beginning and end of the data set
+datetime <- strptime(twl$datetime, "%Y-%m-%dT%H:%M:%OSZ", "GMT")  #vector of datestamps in a format R can work with
+twl <- twl[datetime < as.POSIXct("2014-05-16", "GMT") & datetime > as.POSIXct("2013-06-11", "GMT"),]    #Remove data logged after Apr 20, 2012
 
 #Lets save it
 write.csv(twl$allTwilights, file = "data/A2_twl_FlightR.csv", quote = FALSE, row.names = FALSE)
-
 
 #------------------------------------------
 #/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
@@ -177,7 +175,7 @@ twlx <- read.csv("data/A2_TAGS_twl.txt")       #read in the twilight data
 
 #FLightR makes use of all that continuous light level from a Migration Technology tag
 #So we should restore that data to the output from TAGS
-twl <- twl[twl$twilight != 0 & twl$excluded = FALSE,]  #get just the twilights from the TAGS output (twilight not equal to 0)
+twl <- twl[twl$twilight != 0 & twl$excluded == FALSE,]  #get just the twilights from the TAGS output (twilight not equal to 0)
 twl$light <- twl$light/10       #divide by 10 to get back to the original light values (almost)
 
 d.lux <- readMTlux("data/A2_raw_data.lux")      #restore d.lux to orginal state (with large numbers))

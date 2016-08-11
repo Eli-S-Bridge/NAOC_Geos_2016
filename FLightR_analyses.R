@@ -86,12 +86,24 @@ b-a                 #how long did it take?
 load("data/A2_FLightR_results.RData")
 
 #PLOTTING
-#Plot a simple map
-map.FLightR.ggmap(Result)
-
-#PLOTTING
 #Plot and save a simple map
 map.FLightR.ggmap(Result, save.options = list(filename = "data/FLightR.map.pdf"))
 
 #Plot lon lat graph
 plot.lon.lat(Result)
+
+#ESTIMATING ARRIVAL TIMES
+
+#Choose a zone or portion of the grid that you want to focus on.
+#For example, all longitudes greater than 2.
+Index<-which(Result$Spatial$Grid[,1] > 2)
+
+#Now you can calculte the probabilities that the bird was in 
+#the indexed zone
+Prob_in_Zone<-get.prob.of.being.in(Result, Index)
+plot(Prob_in_Zone)
+
+#Now we can extract the times when the bird moved into the zone
+Times.NL=find.times.distribution(Prob_in_Zone, Result$Indices$Matrix.Index.Table$time)
+#The answer is a set of quartiles.
+Times.NL

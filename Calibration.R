@@ -92,6 +92,7 @@ tripMap(track, equinox = TRUE, xlim = c(-90,-70), ylim = c(10,50), legend = TRUE
 #What if you are not sure what data are good for calibrating?
 #Here's a process that uses FlightR to delineate good calibration periods
 
+library(FLightR)
 Proc.data<-get.tags.data("data/A2_FLightR_twl.csv") #opens and formats data straight from TAGS formatted csv file
 
 start=c(5.43, 52.93)  #tracking orgin, start location longitude and latitude
