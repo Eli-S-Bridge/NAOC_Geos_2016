@@ -1,8 +1,8 @@
 # Check to make sure the required packages are installed on your machine
 # If not, they will be installed
 
-reqPackages <- c("devtools","digest","GeoLight","rages","geosphere","raster","fields","forecast",
-                  "circular","truncnom","parallel","bit","rgdal","CircStats","Rcpp","RcppArmadillo",
+reqPackages <- c("devtools","digest","GeoLight","geosphere","raster","fields","forecast",
+                  "circular","truncnorm","parallel","bit","rgdal","CircStats","Rcpp","RcppArmadillo",
 				  "ggmap","ggsn","sp","maptools","rgeos","MASS")
 
 
